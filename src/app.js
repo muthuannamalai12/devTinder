@@ -2,92 +2,187 @@ const express = require("express");
 
 const app = express();
 
-// -> Node runs the code from top to bottom hence the order of routes matter
-// -> /hello matches all the things that start with /hello/123/xyz or /hello/xyz but it does not handle /hello123. It will be the same logic for all the other routers
-// -> If we keep / at the top nothing after that matches like /hello or /test and / request handler alone will be executed
+// When we do not return anything the request goes on a infinite loop in the postman and in browsers after certain time they get timed out
+// app.get("/user", (req, res) => {});
 
-app.get("/user", (req, res) => {
-  // req.query is used to retreive the query params from the request
-  // For /user?userId=100 it logs { userId: '100' }
-  // For /user?userId=100&password="muthu" it logs { userId: '100', password: '"muthu"' }
-  console.log(req.query);
-  res.send({ firstName: "Muthu Annamalai", lastName: "Venkatachalam" });
-});
+// Output : Handling the route user 1!! in console and 1st Response will be provided since after sending the response using res.send nothing is executed in JS
+// app.use(
+//   "/user",
+//   (req, res) => {
+//     console.log("Handling the route user 1!!");
+//     res.send("1st Response");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 2!!");
+//     res.send("2nd Response");
+//   }
+// );
 
-app.get("/user/:userId", (req, res) => {
-  // used to retreive the path params from the request
-  // For /user?100 it logs { userId: '100' }
-  console.log(req.params);
-  res.send({ firstName: "Muthu Annamalai", lastName: "Venkatachalam" });
-});
+// Output : Prints Handling the route user 1!! in console and goes into infinite loop as there is no response is sent back express will not understand it needs to go to the next route handler without specifying the next keyword
+// app.use(
+//   "/user",
+//   (req, res) => {
+//     console.log("Handling the route user 1!!");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 2!!");
+//     res.send("2nd Response");
+//   }
+// );
 
-app.get("/user/:userId/:name/:password", (req, res) => {
-  // used to retreive the path params from the request
-  // For /user/100/Muthu/abc@123 it logs { userId: '100', name: 'Muthu', password: 'abc@123' }
-  console.log(req.params);
-  res.send({ firstName: "Muthu Annamalai", lastName: "Venkatachalam" });
-});
+// Output : Prints Handling the route user 1!! in console and sice next is given it moves to the 2nd request handler and prints Handling the route user 2!! and returns the 2nd Response
+// app.use(
+//   "/user",
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 2!!");
+//     res.send("2nd Response");
+//   }
+// );
 
-app.post("/user", (req, res) => {
-  // logic to save data in DB
-  res.send("Data successfully saved to DB");
-});
+// Output : Prints Handling the route user 1!! in console and returns 1st Response and since next is there and JS executes line by line it goes to the next route handler prints Handling the route user 2!! in console and throws error since we are trying to send 2nd time response to the same API /user
+// app.use(
+//   "/user",
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     res.send("1st Response");
+//     next();
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 2!!");
+//     res.send("2nd Response");
+//   }
+// );
 
-app.put("/user", (req, res) => {
-  // logic to update data in DB
-  res.send("Data successfully updated in DB");
-});
+// Output: Handling the route user 1!! and 1st Response since we have a return in the first request handler itslef it will not move down the pipe
+// app.use(
+//   "/user",
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     res.send("1st Response");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 1!!");
+//     res.send("2nd Response");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 3!!");
+//     res.send("3nd Response");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 4!!");
+//     res.send("4th Response");
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 5!!");
+//     res.send("5th Response");
+//   }
+// );
 
-app.patch("/user", (req, res) => {
-  // logic to path the data in DB
-  res.send("Data successfully patched in the DB");
-});
+// Output : Handling the route user 1!!, Handling the route user 2!!, Handling the route user 3!!, Handling the route user 4!!, Handling the route user 5!! will be printed in the console and 5th Response will be returned since till 4th one we do not have return and only have next
+// app.use(
+//   "/user",
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 3!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 4!!");
+//     next();
+//   },
+//   (req, res) => {
+//     console.log("Handling the route user 5!!");
+//     res.send("5th Response");
+//   }
+// );
 
-app.delete("/user", (req, res) => {
-  // logic to delete the data in DB
-  res.send("Data successfully deleted in the DB");
-});
+// Output : Handling the route user 1!!, Handling the route user 2!!, Handling the route user 3!!, Handling the route user 4!!, Handling the route user 5!! and an error will be thrown since the 5th request handler as next() express expects a request handler but when it does not find one it throws an error
+// app.use(
+//   "/user",
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 3!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 4!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 5!!");
+//     next();
+//   }
+// );
 
-// ? makes b optional so now this route will match for abc or only ab
-app.get("/ab?c", (req, res) => {
-  res.send("Hello");
-});
+// We can map all the request handlers inside a single array like below even we can wrap any two or three request handlers and it will work fine
+// app.use("/user", [
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 1!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 3!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 4!!");
+//     next();
+//   },
+//   (req, res, next) => {
+//     console.log("Handling the route user 5!!");
+//     res.send("5th Response");
+//   },
+// ]);
 
-// + allows us to add as many y after x so the route matches for /xyz or /xyyyyyyz like that
-app.get("/xy+z", (req, res) => {
-  res.send("Hello!!");
-});
-
-// * allows us to add anything in between ef and gh so it matches for /abcd or /efMuthugh like that
-app.get("/ef*gh", (req, res) => {
-  res.send("Hello!");
-});
-
-// ? makes kl optional so it will work for /ijklm or /ijm but will not work /ijlm
-// The sequence kl is optional, but if present, it must appear exactly as kl and not in any other way this is the reason why /ijlm does not work
-app.get("/ij(kl)?m", (req, res) => {
-  res.send("Hello!");
-});
-
-// + allows us to add as many bc after a so the route matches for /abcd or /abcbcbcd like that
-app.get("/a(bc)+d", (req, res) => {
-  res.send("Hello!");
-});
-
-// Below regex works if a is there else would not work
-app.get(/a/, (req, res) => {
-  res.send("Hello from regex a!");
-});
-
-// Below regex works if anything in start and end with fly
-app.get(/.*fly$/, (req, res) => {
-  res.send("Hello from regex fly!");
-});
-
-// Will match all the HTTP method API calls so for any request coming with GET, POST, PUT, PATCH or DELETE to /test it returns only Hello from Test
-app.use("/test", (req, res) => {
-  res.end("Hello from Test");
-});
+app.use(
+  "/user",
+  [
+    (req, res, next) => {
+      console.log("Handling the route user 1!!");
+      next();
+    },
+    (req, res, next) => {
+      console.log("Handling the route user 1!!");
+      next();
+    },
+  ],
+  [
+    (req, res, next) => {
+      console.log("Handling the route user 3!!");
+      next();
+    },
+    (req, res, next) => {
+      console.log("Handling the route user 4!!");
+      next();
+    },
+    (req, res, next) => {
+      console.log("Handling the route user 5!!");
+      res.send("5th Response");
+    },
+  ]
+);
 
 app.listen(7777, () => {
   console.log("Application Successfully started on port 7777");
