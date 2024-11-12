@@ -3,34 +3,22 @@ const { checkAdminAccess, checkUserAccess } = require("./middleware/auth");
 
 const app = express();
 
-app.use("/admin", checkAdminAccess);
-
-app.get("/admin/getAllData", (req, res) => {
-  res.send("Data Retreived Successfully");
+app.get("/user/getUserData", (req, res) => {
+  try {
+    throw new Error("edgbhnjmkl");
+  } catch (err) {
+    res.send("Error occured contact support team");
+  }
 });
 
-app.get("/admin/deleteData", (req, res) => {
-  res.send("Data Deleted Successfully");
-});
-
-// If we have only one route we can directly pass the middleware in the app.get itself
-app.get("/user/userData", checkUserAccess, (req, res) => {
-  res.send("Details Fetched Successfully");
-});
-
-app.get("/user/login", (req, res) => {
-  res.send("User Logged in Successfully");
-});
-
-// Instead of writing nested request handler we can also write like below with the same path now the 2nd route handler is in line 11 and works the same as before
-app.get("/user", (req, res, next) => {
-  console.log("Handling the route user 1!!");
-  next();
-});
-
-app.get("/user", (req, res) => {
-  console.log("Handling the route user 2!!");
-  res.send("2nd Response");
+// One way to handle error other than try catch
+// Always have this error at the bottom of code
+// Even if we move this code above the route of /user/getUserData Error occured contact support team will only be printed since the below works only after we throw the error
+// If we do not have try catch and move below at the top above the route of /user/getUserData we will get ungraceful error which we got first time
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.send("Something went wrong");
+  }
 });
 
 app.listen(7777, () => {
