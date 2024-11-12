@@ -1,0 +1,14 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "Tinder Application for developers",
+  "main": "index.js",
+  "scripts": {
+    "start" : "nodemon src/app.js"
+  },
+  "author": "Muthu Annamalai Venkatachalam",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
