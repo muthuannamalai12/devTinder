@@ -1,26 +1,41 @@
 const express = require("express");
-const { checkAdminAccess, checkUserAccess } = require("./middleware/auth");
+const { connectToDb } = require("./config/database");
+const { User } = require("./models/user");
 
 const app = express();
 
-app.get("/user/getUserData", (req, res) => {
+app.post("/signup", async (req, res) => {
+  const userObj = {
+    firstName: "Nanda Kishore",
+    lastName: "Reddy",
+    email: "nandakishore@gmail.com",
+    password: "password",
+  };
+  // Creating a new instance of User model with user obj
+  const user = new User(userObj);
+  // Can also be written as
+  //   const userObj = new User({
+  //     firstName: "Muthu",
+  //     lastName: "Annamalai",
+  //     email: "muthuannamalai2002@gmail.com",
+  //     password: "password",
+  //   });
+
   try {
-    throw new Error("edgbhnjmkl");
+    await user.save();
+    res.send("User added successfully");
   } catch (err) {
-    res.send("Error occured contact support team");
+    return res.status(500).send("Something went wrong");
   }
 });
 
-// One way to handle error other than try catch
-// Always have this error at the bottom of code
-// Even if we move this code above the route of /user/getUserData Error occured contact support team will only be printed since the below works only after we throw the error
-// If we do not have try catch and move below at the top above the route of /user/getUserData we will get ungraceful error which we got first time
-app.use("/", (err, req, res, next) => {
-  if (err) {
-    res.send("Something went wrong");
-  }
-});
-
-app.listen(7777, () => {
-  console.log("Application Successfully started on port 7777");
-});
+connectToDb()
+  .then(() => {
+    console.log("Database connection established Successfully");
+    app.listen(7777, () => {
+      console.log("Application Successfully started on port 7777");
+    });
+  })
+  .catch((err) => {
+    console.log("Database connection not established successfully");
+  });
