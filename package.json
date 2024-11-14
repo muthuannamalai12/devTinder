@@ -9,8 +9,10 @@
   "author": "Muthu Annamalai Venkatachalam",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.21.1",
     "mongoose": "^8.8.1",
-    "moongoose": "^0.0.5"
+    "moongoose": "^0.0.5",
+    "validator": "^13.12.0"
   }
 }
