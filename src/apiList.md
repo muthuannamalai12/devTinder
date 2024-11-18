@@ -10,7 +10,7 @@
 
 - GET /profile/view
 - PATCH /profile/edit
-- PATCH /profile/password // Forgot password API
+- PATCH /profile/edit/password // Forgot password API
 
 ## connectionRequestRouter
 
