@@ -74,6 +74,48 @@ connectionRequestRouter.post(
   }
 );
 
+connectionRequestRouter.post(
+  "/request/review/:status/:requestId",
+  checkUserAccess,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+      // Need to check the below
+      // i) Validate the status coming from the request it should only be accepted or rejected
+      // ii) Validate the requestId
+      // iii) Check if the user who is accepting the request is the one who is present in toUserId and he is only logged in (i.e) Should not allow the user who sent to accept the request
+      // iv) If the request is in only interested state only it can be accepted
+
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid status type: " + status });
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser._id,
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        return res.status(500).json({
+          message: "Connection Request Could not be Found",
+        });
+      }
+      connectionRequest.status = status;
+      const data = await connectionRequest.save();
+      res.json({
+        message: "Connection Request" + status,
+        data,
+      });
+    } catch (err) {
+      res.status(500).send("ERROR : " + err.message);
+    }
+  }
+);
+
 module.exports = {
   connectionRequestRouter,
 };
